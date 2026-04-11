@@ -35,6 +35,10 @@ local servers = {
       },
     },
   },
+  dartls = {
+    capabilities = capabilities,
+    cmd = { "/home/milianingco/develop/flutter_linux_3.41.6-stable/flutter/bin/dart", "language-server", "--protocol=lsp" },
+  },
 }
 
 -- Register them
@@ -44,7 +48,7 @@ end
 
 -- Autostart for matching filetypes
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "lua", "c", "cpp", "python", "typescript", "html", "css", "rust" },
+  pattern = { "lua", "c", "cpp", "python", "typescript", "html", "css", "rust", "dart" },
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
     if servers[ft] then
@@ -52,7 +56,12 @@ vim.api.nvim_create_autocmd("FileType", {
     end
   end,
 })
-
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "dart",
+  callback = function()
+    vim.lsp.start(servers["dartls"])
+  end,
+})
 
 -- Global LSP keymaps
 vim.keymap.set("n", "K", vim.lsp.buf.hover, {})

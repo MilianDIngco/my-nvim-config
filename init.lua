@@ -1,5 +1,3 @@
-print("init.lua")
-
 require("core.keymaps")
 require("core.options")
 require("core.lazy")
@@ -13,3 +11,6 @@ require("config.lualine")
 require("config.lsp")
 require("config.formatting")
 require("config.completion")
+
+--------------- slipbox ---------------------
+require("slipbox.init").setup()

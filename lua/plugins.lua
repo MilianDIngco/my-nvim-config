@@ -93,14 +93,14 @@ return {
 
 	-- RUST
 	{ "simrat39/rust-tools.nvim" },
-  -- Flutter / Dart
---	{
---		"nvim-flutter/flutter-tools.nvim",
---		lazy = false,
---		dependencies = {
---			"nvim-lua/plenary.nvim",
---			"stevearc/dressing.nvim", -- optional for vim.ui.select
---		},
---		config = true,
---	},
+	-- Flutter / Dart
+	{
+		"nvim-flutter/flutter-tools.nvim",
+		lazy = false,
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"stevearc/dressing.nvim", -- optional for vim.ui.select
+		},
+		config = true,
+	},
 }

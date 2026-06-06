@@ -1,5 +1,7 @@
 -- TREESITTER
-local tsconfigs = require("nvim-treesitter.configs")
+local ok, tsconfigs = pcall(require, "nvim-treesitter.configs")
+if not ok then return end
+
 tsconfigs.setup({
   ensure_installed = {
     "lua",

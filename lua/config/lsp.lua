@@ -3,15 +3,15 @@ require("mason").setup()
 
 -- MASON-LSPCONFIG
 require("mason-lspconfig").setup({
-  ensure_installed = {
-    "lua_ls",
-    "clangd",
-    "pyright",
-    "ts_ls",
-    "html",
-    "cssls",
-    "rust_analyzer",
-  },
+	ensure_installed = {
+		"lua_ls",
+		"clangd",
+		"pyright",
+		"ts_ls",
+		"html",
+		"cssls",
+		"rust_analyzer",
+	},
 })
 
 ------------------------------------------------------- LSP CONFIG -------------------------------------------------------
@@ -20,30 +20,26 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 -- Define configs
 local servers = {
-  lua_ls = { capabilities = capabilities },
-  clangd = { capabilities = capabilities },
-  pyright = { capabilities = capabilities },
-  ts_ls = { capabilities = capabilities },
-  html = { capabilities = capabilities },
-  cssls = { capabilities = capabilities },
-  rust_analyzer = {
-    capabilities = capabilities,
-    settings = {
-      ["rust-analyzer"] = {
-        cargo = { allFeatures = true },
-        checkOnSave = true,
-      },
-    },
-  },
-  dartls = {
-    capabilities = capabilities,
-    cmd = { "/home/milianingco/develop/flutter_linux_3.41.6-stable/flutter/bin/dart", "language-server", "--protocol=lsp" },
-  },
+	lua_ls = { capabilities = capabilities },
+	clangd = { capabilities = capabilities },
+	pyright = { capabilities = capabilities },
+	ts_ls = { capabilities = capabilities },
+	html = { capabilities = capabilities },
+	cssls = { capabilities = capabilities },
+	rust_analyzer = {
+		capabilities = capabilities,
+		settings = {
+			["rust-analyzer"] = {
+				cargo = { allFeatures = true },
+				checkOnSave = true,
+			},
+		},
+	},
 }
 
 -- Register them
 for name, config in pairs(servers) do
-  vim.lsp.config(name, config)
+	vim.lsp.config(name, config)
 end
 
 -- Autostart for matching filetypes
@@ -51,17 +47,32 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = { "lua", "c", "cpp", "python", "typescript", "html", "css", "rust", "dart" },
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
-    if servers[ft] then
-      vim.lsp.start(servers[ft])
+    local ft_to_server = {
+      lua = "lua_ls",
+      c = "clangd",
+      cpp = "clangd",
+      python = "pyright",
+      typescript = "ts_ls",
+      html = "html",
+      css = "cssls",
+      rust = "rust_analyzer",
+      dart = "dartls",
+    }
+    local server = ft_to_server[ft]
+    if server and servers[server] then
+      vim.lsp.start(servers[server])
     end
   end,
 })
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "dart",
-  callback = function()
-    vim.lsp.start(servers["dartls"])
-  end,
-})
+--vim.api.nvim_create_autocmd("FileType", {
+--	pattern = { "lua", "c", "cpp", "pyright", "typescript", "html", "css", "rust" },
+--	callback = function(args)
+--		local ft = vim.bo[args.buf].filetype
+--		if servers[ft] then
+--			vim.lsp.start(servers[ft])
+--		end
+--	end,
+--})
 
 -- Global LSP keymaps
 vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
@@ -69,9 +80,9 @@ vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
 
 vim.diagnostic.config({
-  virtual_text = true,
-  signs = true,
-  underline = true,
-  update_in_insert = true,
-  severity_sort = true,
+	virtual_text = true,
+	signs = true,
+	underline = true,
+	update_in_insert = true,
+	severity_sort = true,
 })

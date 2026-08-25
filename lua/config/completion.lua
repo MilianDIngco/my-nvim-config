@@ -1,11 +1,26 @@
 -- NVIM-CMP
 local cmp = require("cmp")
+local luasnip = require("luasnip")
 require("luasnip.loaders.from_vscode").lazy_load()
+
+-- FIX : Stop Luasnip from remembering old snippets and jumping back when tabbed
+vim.api.nvim_create_autocmd("ModeChanged", {
+	pattern = "*",
+	callback = function()
+		if
+			((vim.v.event.old_mode == "s" and vim.v.event.new_mode == "n") or vim.v.event.old_mode == "i")
+			and luasnip.session.current_nodes[vim.api.nvim_get_current_buf()]
+			and not luasnip.session.jump_active
+		then
+			luasnip.unlink_current()
+		end
+	end,
+})
 
 cmp.setup({
 	snippet = {
 		expand = function(args)
-			require("luasnip").lsp_expand(args.body)
+      luasnip.lsp_expand(args.body)
 		end,
 	},
 	window = {
@@ -21,8 +36,9 @@ cmp.setup({
 		["<Tab>"] = cmp.mapping(function(fallback)
 			if cmp.visible() then
 				cmp.select_next_item()
-			elseif require("luasnip").expand_or_jumpable() then
-				require("luasnip").expand_or_jump()
+      -- FIX: ONly jump if active snippet in progress. 
+      elseif luasnip.locally_jumpable(1) then
+        luasnip.jump(1)
 			else
 				fallback()
 			end
@@ -30,8 +46,9 @@ cmp.setup({
 		["<S-Tab>"] = cmp.mapping(function(fallback)
 			if cmp.visible() then
 				cmp.select_prev_item()
-			elseif require("luasnip").jumpable(-1) then
-				require("luasnip").jump(-1)
+      -- FIX: ONly jump backward if there is an active snippet session
+      elseif luasnip.locally_jumpable(-1) then
+        luasnip.jump(-1)
 			else
 				fallback()
 			end

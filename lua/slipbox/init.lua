@@ -1,165 +1,165 @@
-local M = {}
-
-local defaults = {
-	slipboxDirectory = "~/slipbox",
-}
-
--- Generates unique slipbox names based on the current time
--- Name format: [time][title].md
-local function generateName(name)
-	local time = os.time()
-	return string.format("[%s][%s].md", time, name)
-end
-
-local function renameFile(filename, newName)
-	local results = {}
-	for match in filename:gmatch("%[(.-)%]") do
-		table.insert(results, match)
-	end
-
-	local time = results[1]
-
-	return string.format("[%s][%s].md", time, newName)
-end
-
-local function loadBox()
-	-- Check if slipboxDirectory exists, if not, create it.
-	if not vim.uv.fs_stat(M.options.slipboxDirectory) then
-		print(string.format("Slipbox directory doesn't exist, creating new one at %s", M.options.slipboxDirectory))
-		vim.fn.mkdir(M.options.slipboxDirectory, "p")
-	else
-		print(string.format("Slipbox directory exists at %s", M.options.slipboxDirectory))
-	end
-
-	-- Check if slipbox.json exists, if not, create it.
-	local slipboxJSONPath = vim.fs.joinpath(M.options.slipboxDirectory, "slipbox.json")
-	if not vim.uv.fs_stat(slipboxJSONPath) then
-		print(string.format("Slipbox JSON doesn't exist, creating new one at %s", slipboxJSONPath))
-		local file = io.open(slipboxJSONPath, "w")
-		if file then
-			local emptyJSON = {
-				graph = {},
-				tags = {},
-			}
-      local success, jsonSTR = pcall(vim.json.encode, emptyJSON)
-      if not success then print("ERROR: Failed to write empty json to file") end
-			file:write(jsonSTR)
-			file:close()
-		end
-	end
-
-	-- Load slipbox.json into a table
-	local file = io.open(slipboxJSONPath, "r")
-	if not file then
-		return nil
-	end
-	local jsonSTR = file:read("*a")
-	if jsonSTR then
-		local tbl = vim.fn.json_decode(jsonSTR)
-		M.graph = tbl.graph
-		M.tags = tbl.tags
-	end
-end
-
-function M.onExit()
-  local JSON = {
-    graph = M.graph,
-    tags = M.tags,
-  }
-  local success, jsonSTR = pcall(vim.json.encode, JSON)
-  if not success then print("Failed to save json file") end
-  local file = io.open(vim.fs.joinpath(M.options.slipboxDirectory, "slipbox.json"), "w")
-  if not file then
-    print("ERROR: Failed to open slipbox json")
-    return nil
-  end
-  print("Saving file")
-  file:write(jsonSTR)
-  file:close()
-end
-
--- Create Note
----- Create new Note
----- Create note linked to current note
-function M.createNote()
-	vim.ui.input({ prompt = "Enter the filename: " }, function(input)
-    local filename = generateName(input)
-    -- Update tables
-    M.graph[filename] = {}
-    M.tags[filename] = {}
-
-    print(vim.inspect(M.graph))
-    -- Create note 
-    local filepath = vim.fs.joinpath(M.options.slipboxDirectory, filename)
-    local file = io.open(filepath, "w")
-    if not file then
-      print("Failed to create file")
-      return nil
-    end
-    file:close()
-    vim.cmd("edit " .. filepath)
-	end)
-end
-
--- Link Note
-function M.linkNote()
-  M.telescope.find_files()
-end
-
-local actions = require('telescope.actions')
-local action_state = require('telescope.actions.state')
-
-function M.get_note_filename()
-  require('telescope.builtin').find_files({
-    prompt_title = "Select Note",
-    cwd = "~/slipbox",
-    attach_mappings = function(prompt_bufnr, map)
-      actions.select_default:replace(function()
-        local selection = action_state.get_selected_entry()
-        actions.close(prompt_bufnr)
-        local basename = vim.fn.fnamemodify(selection[1], ":t")  -- Just filename
-        print(string.format("%s selected", basename))
-      end)
-      return true
-    end,
-  })
-end
-
--- Add tag to note
-
--- Filter notes by:
----- Tag
----- Degrees of separation
----- Name
-
-function M.setup(opts)
-	-- Make empty table if opts is nil
-	opts = opts or {}
-
-  -- Set up telescope
-  M.telescope = require('telescope.builtin')
-
-	-- Merge default with opts
-	M.options = vim.tbl_deep_extend("force", {}, defaults, opts)
-
-	-- expand home for slipbox slipboxDirectory
-	M.options.slipboxDirectory = vim.fn.expand(M.options.slipboxDirectory)
-
-	loadBox()
-
-	-- create user commands
-	vim.api.nvim_create_user_command("Slipbox", function(func)
-		local fn = M[func.args]
-		if fn then
-			fn()
-		else
-			print("That function does not exist")
-		end
-	end, { nargs = 1 })
-
-  vim.api.nvim_create_autocmd("VimLeavePre", {
-    callback = M.onExit,
-  })
-end
-
-return M
+-- local M = {}
+--
+-- local defaults = {
+-- 	slipboxDirectory = "~/slipbox",
+-- }
+--
+-- -- Generates unique slipbox names based on the current time
+-- -- Name format: [time][title].md
+-- local function generateName(name)
+-- 	local time = os.time()
+-- 	return string.format("[%s][%s].md", time, name)
+-- end
+--
+-- local function renameFile(filename, newName)
+-- 	local results = {}
+-- 	for match in filename:gmatch("%[(.-)%]") do
+-- 		table.insert(results, match)
+-- 	end
+--
+-- 	local time = results[1]
+--
+-- 	return string.format("[%s][%s].md", time, newName)
+-- end
+--
+-- local function loadBox()
+-- 	-- Check if slipboxDirectory exists, if not, create it.
+-- 	if not vim.uv.fs_stat(M.options.slipboxDirectory) then
+-- 		print(string.format("Slipbox directory doesn't exist, creating new one at %s", M.options.slipboxDirectory))
+-- 		vim.fn.mkdir(M.options.slipboxDirectory, "p")
+-- 	else
+-- 		print(string.format("Slipbox directory exists at %s", M.options.slipboxDirectory))
+-- 	end
+--
+-- 	-- Check if slipbox.json exists, if not, create it.
+-- 	local slipboxJSONPath = vim.fs.joinpath(M.options.slipboxDirectory, "slipbox.json")
+-- 	if not vim.uv.fs_stat(slipboxJSONPath) then
+-- 		print(string.format("Slipbox JSON doesn't exist, creating new one at %s", slipboxJSONPath))
+-- 		local file = io.open(slipboxJSONPath, "w")
+-- 		if file then
+-- 			local emptyJSON = {
+-- 				graph = {},
+-- 				tags = {},
+-- 			}
+--       local success, jsonSTR = pcall(vim.json.encode, emptyJSON)
+--       if not success then print("ERROR: Failed to write empty json to file") end
+-- 			file:write(jsonSTR)
+-- 			file:close()
+-- 		end
+-- 	end
+--
+-- 	-- Load slipbox.json into a table
+-- 	local file = io.open(slipboxJSONPath, "r")
+-- 	if not file then
+-- 		return nil
+-- 	end
+-- 	local jsonSTR = file:read("*a")
+-- 	if jsonSTR then
+-- 		local tbl = vim.fn.json_decode(jsonSTR)
+-- 		M.graph = tbl.graph
+-- 		M.tags = tbl.tags
+-- 	end
+-- end
+--
+-- function M.onExit()
+--   local JSON = {
+--     graph = M.graph,
+--     tags = M.tags,
+--   }
+--   local success, jsonSTR = pcall(vim.json.encode, JSON)
+--   if not success then print("Failed to save json file") end
+--   local file = io.open(vim.fs.joinpath(M.options.slipboxDirectory, "slipbox.json"), "w")
+--   if not file then
+--     print("ERROR: Failed to open slipbox json")
+--     return nil
+--   end
+--   print("Saving file")
+--   file:write(jsonSTR)
+--   file:close()
+-- end
+--
+-- -- Create Note
+-- ---- Create new Note
+-- ---- Create note linked to current note
+-- function M.createNote()
+-- 	vim.ui.input({ prompt = "Enter the filename: " }, function(input)
+--     local filename = generateName(input)
+--     -- Update tables
+--     M.graph[filename] = {}
+--     M.tags[filename] = {}
+--
+--     print(vim.inspect(M.graph))
+--     -- Create note 
+--     local filepath = vim.fs.joinpath(M.options.slipboxDirectory, filename)
+--     local file = io.open(filepath, "w")
+--     if not file then
+--       print("Failed to create file")
+--       return nil
+--     end
+--     file:close()
+--     vim.cmd("edit " .. filepath)
+-- 	end)
+-- end
+--
+-- -- Link Note
+-- function M.linkNote()
+--   M.telescope.find_files()
+-- end
+--
+-- local actions = require('telescope.actions')
+-- local action_state = require('telescope.actions.state')
+--
+-- function M.get_note_filename()
+--   require('telescope.builtin').find_files({
+--     prompt_title = "Select Note",
+--     cwd = "~/slipbox",
+--     attach_mappings = function(prompt_bufnr, map)
+--       actions.select_default:replace(function()
+--         local selection = action_state.get_selected_entry()
+--         actions.close(prompt_bufnr)
+--         local basename = vim.fn.fnamemodify(selection[1], ":t")  -- Just filename
+--         print(string.format("%s selected", basename))
+--       end)
+--       return true
+--     end,
+--   })
+-- end
+--
+-- -- Add tag to note
+--
+-- -- Filter notes by:
+-- ---- Tag
+-- ---- Degrees of separation
+-- ---- Name
+--
+-- function M.setup(opts)
+-- 	-- Make empty table if opts is nil
+-- 	opts = opts or {}
+--
+--   -- Set up telescope
+--   M.telescope = require('telescope.builtin')
+--
+-- 	-- Merge default with opts
+-- 	M.options = vim.tbl_deep_extend("force", {}, defaults, opts)
+--
+-- 	-- expand home for slipbox slipboxDirectory
+-- 	M.options.slipboxDirectory = vim.fn.expand(M.options.slipboxDirectory)
+--
+-- 	loadBox()
+--
+-- 	-- create user commands
+-- 	vim.api.nvim_create_user_command("Slipbox", function(func)
+-- 		local fn = M[func.args]
+-- 		if fn then
+-- 			fn()
+-- 		else
+-- 			print("That function does not exist")
+-- 		end
+-- 	end, { nargs = 1 })
+--
+--   vim.api.nvim_create_autocmd("VimLeavePre", {
+--     callback = M.onExit,
+--   })
+-- end
+--
+-- return M

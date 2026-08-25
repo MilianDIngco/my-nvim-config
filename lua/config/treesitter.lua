@@ -18,6 +18,8 @@ tsconfigs.setup({
     "markdown_inline",
     "rust",
     "dart",
+    "typescript",
+    "scss",
   },
   auto_install = true,
   highlight = { enable = true },

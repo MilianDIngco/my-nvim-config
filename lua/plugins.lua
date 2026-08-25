@@ -1,38 +1,28 @@
 return {
 	-- color schemes --
 	{
-		"sainnhe/everforest",
+		"AstroNvim/astrotheme",
+		name = "astrotheme",
 		lazy = false,
 		priority = 1000,
 		config = function()
-			require("config.colorscheme")
+			vim.o.background = "dark"
+			require("astrotheme").setup({
+				palette = "astrodark",
+				background = { ui = "dark", terminal = "dark" },
+				termcolors = true,
+			})
+			vim.cmd.colorscheme("astrodark")
 		end,
 	},
-
-	-- TREESITTER
 	{
-		"nvim-treesitter/nvim-treesitter",
-		build = ":TSUpdate",
-		event = { "BufReadPost", "BufNewFile" },
+		"nvim-lualine/lualine.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
-			require("config.treesitter")
+			require("config.lualine")
 		end,
 	},
 
-	-- TELESCOPE
-	{
-		"nvim-telescope/telescope.nvim",
-		tag = "0.1.8",
-		dependencies = { 
-      "nvim-lua/plenary.nvim" ,
-      "nvim-telescope/telescope-ui-select.nvim",
-    },
-		config = function()
-			require("config.telescope")
-		end,
-	},
-
-	-- NEOTREE
 	{
 		"nvim-neo-tree/neo-tree.nvim",
 		branch = "v3.x",
@@ -42,22 +32,32 @@ return {
 			"MunifTanjim/nui.nvim",
 		},
 		lazy = false,
-		opts = {},
 		config = function()
 			require("config.neotree")
 		end,
 	},
 
-	-- LUALINE
 	{
-		"nvim-lualine/lualine.nvim",
-		dependencies = { "nvim-tree/nvim-web-devicons" },
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		event = { "BufReadPost", "BufNewFile" },
 		config = function()
-			require("config.lualine")
+			require("config.treesitter")
 		end,
 	},
 
-	-- MASON
+	{
+		"nvim-telescope/telescope.nvim",
+		branch = "master",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope-ui-select.nvim",
+		},
+		config = function()
+			require("config.telescope")
+		end,
+	},
+
 	{
 		"williamboman/mason.nvim",
 		dependencies = {
@@ -69,40 +69,81 @@ return {
 		end,
 	},
 
-	-- NONE LS
+	{
+		"mfussenegger/nvim-lint",
+		event = { "BufReadPre", "BufNewFile" },
+	},
 	{
 		"nvimtools/none-ls.nvim",
+		dependencies = { "nvimtools/none-ls-extras.nvim" },
 		config = function()
 			require("config.formatting")
 		end,
 	},
 
-	-- COMPLETIONS
 	{
-		"hrsh7th/cmp-nvim-lsp",
+		"hrsh7th/nvim-cmp",
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp",
+			"L3MON4D3/LuaSnip",
+			"saadparwaiz1/cmp_luasnip",
+			"rafamadriz/friendly-snippets",
+		},
 		config = function()
 			require("config.completion")
 		end,
 	},
 	{
-		"L3MON4D3/LuaSnip",
-		dependencies = {
-			"saadparwaiz1/cmp_luasnip",
-			"rafamadriz/friendly-snippets",
-		},
-	},
-	{ "hrsh7th/nvim-cmp" },
+		"mrcjkb/rustaceanvim",
+		version = "^9",
+		lazy = false,
+		config = function()
+			local capabilities = {}
+			local has_cmp, cmp_lsp = pcall(require, "cmp_nvim_lsp")
+			if has_cmp then
+				capabilities = cmp_lsp.default_capabilities()
+			end
 
-	-- RUST
-	{ "simrat39/rust-tools.nvim" },
-	-- Flutter / Dart
+			vim.g.rustaceanvim = {
+				server = {
+					capabilities = capabilities,
+					default_settings = {
+						["rust-analyzer"] = {
+							rustfmt = { extraArgs = { "--config", "tab_spaces=2,hard_tabs=false" } },
+							check = { command = "clippy", extraArgs = { "--", "-W", "clippy::pedantic" } },
+							cargo = { allFeatures = true },
+							procMacro = { enable = true },
+						},
+					},
+				},
+			}
+		end,
+	},
 	{
 		"nvim-flutter/flutter-tools.nvim",
 		lazy = false,
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"stevearc/dressing.nvim", -- optional for vim.ui.select
-		},
+		dependencies = { "nvim-lua/plenary.nvim", "stevearc/dressing.nvim" },
 		config = true,
+	},
+	{
+		"joeveiga/ng.nvim",
+		config = function()
+			require("ng")
+		end,
+	},
+	{
+		"Equilibris/nx.nvim",
+		dependencies = {
+			"nvim-telescope/telescope.nvim",
+		},
+		event = { "BufReadPost nx.json", "BufNewFile nx.json" },
+		cmd = { "Nx" },
+		keys = {
+			{ "<leader>nx", "<cmd>Telescope nx actions<CR>", desc = "Nx Actions" },
+		},
+		opts = {
+			nx_cmd_root = nil,
+			read_init = true,
+		},
 	},
 }

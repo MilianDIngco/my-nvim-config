@@ -1,9 +1,6 @@
 -- TREESITTER
-local ok, tsconfigs = pcall(require, "nvim-treesitter.configs")
-if not ok then return end
 
-tsconfigs.setup({
-  ensure_installed = {
+local supported_languages = {
     "lua",
     "c",
     "cpp",
@@ -20,8 +17,15 @@ tsconfigs.setup({
     "dart",
     "typescript",
     "scss",
-  },
-  auto_install = true,
-  highlight = { enable = true },
-  indent = { enable = true },
+}
+
+require('nvim-treesitter').install(supported_languages)
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = supported_languages,
+  callback = function ()
+    vim.treesitter.start()
+    vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+    vim.wo[0][0].foldmethod = 'expr'
+  end,
 })

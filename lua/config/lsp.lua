@@ -1,16 +1,23 @@
 -- MASON SETUP
-require("mason").setup()
+require("mason").setup({ firewall = { enabled = true } })
+
+-- Capabilities
+--  so LSP servers know what my neovim config can do, just a table that goes to all the LSPs
+
+-- Attach behaviors
+--  what happens when a language server connects to a buffer?
+
+-- Per server setup
+--  tell lspconfig how to start the language server and what settings it should get, like cmd or if it should attach to some obscure files
+
+-- Diagnostics / UI config
+--  see :help vim.diagnostic.config() :help diagnostic-api. just google nvim mason diagnostic config help or smth
 
 -- Fetch capabilities from nvim-cmp
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 -- Setup mason-lspconfig to manage server installations
 require("mason-lspconfig").setup({
 	ensure_installed = { "lua_ls", "clangd", "pyright", "ts_ls", "html", "cssls", "angularls", "eslint" },
-})
-
-vim.lsp.config("*", {
-	capabilities = capabilities,
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {

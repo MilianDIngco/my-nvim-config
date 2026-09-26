@@ -1,8 +1,4 @@
-local capabilities = {}
-local has_cmp, cmp_lsp = pcall(require, "cmp_nvim_lsp")
-if has_cmp then
-	capabilities = cmp_lsp.default_capabilities()
-end
+local capabilities = require("blink.cmp").get_lsp_capabilities()
 
 vim.g.rustaceanvim = {
 	server = {

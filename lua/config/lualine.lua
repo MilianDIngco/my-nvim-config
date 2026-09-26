@@ -1,6 +1,6 @@
 -- LUALINE
 require("lualine").setup({
-  options = {
-    theme = "auto",
-  },
+	options = {
+		theme = "auto",
+	},
 })

@@ -1,6 +1,6 @@
 -- fix colors tmuxx
 vim.opt.termguicolors = true
-vim.opt.background = "light"
+vim.opt.background = "dark"
 
 -- Set vim opts
 vim.cmd("filetype indent off")

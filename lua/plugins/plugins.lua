@@ -48,15 +48,14 @@ return {
 				terminal_colors = true,
 				plugin_default = "auto",
 			})
+			vim.cmd.colorscheme("astrotheme")
 		end,
 	},
 	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
-			require("lualine").setup({
-				theme = "auto", -- TODO
-			})
+			require("config.lualine")
 		end,
 	},
 	{
@@ -71,7 +70,6 @@ return {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter",
-		lazy = false,
 		build = ":TSUpdate",
 		event = { "BufReadPost", "BufNewFile" },
 		config = function()
@@ -86,7 +84,7 @@ return {
 			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
 		},
 		config = function()
-			require("config.telescope") -- TODO
+			require("config.telescope")
 		end,
 	},
 	{
@@ -110,9 +108,8 @@ return {
 	},
 	{
 		"mason-org/mason-lspconfig.nvim",
-		opts = {},
 		dependencies = {
-			{ "mason-org/mason.nvim", opts = {} },
+			{ "mason-org/mason.nvim" },
 			"neovim/nvim-lspconfig",
 		},
 	},
@@ -131,29 +128,17 @@ return {
 	{
 		"saghen/blink.cmp",
 		version = "1.*",
-		opts = {
-			sources = {
-				default = { "lazydev", "lsp", "path", "snippets", "buffer" },
-				providers = {
-					lazydev = {
-						name = "LazyDev",
-						module = "lazydev.integrations.blink",
-						score_offset = 100, --makes lazydev completions top prio
-					},
-				},
-			},
-			keymap = { preset = "default" },
-			completion = { documentation = { auto_show = false } },
-			opts_extend = { "sources.default" },
-		},
-		config = function(_, opts)
-			local lspconfig = require("lspconfig")
-			for server, config in pairs(opts.servers) do
-				config.capabilities = require("blink.cmp").get_lsp_capabilities(config.capabilities)
-				lspconfig[server].setup(config)
-			end
+		opts = function()
+			return require("config.completion")
 		end,
 	},
+	-- config = function(_, opts)
+	-- 	local lspconfig = require("lspconfig")
+	-- 	for server, config in pairs(opts.servers) do
+	-- 		config.capabilities = require("blink.cmp").get_lsp_capabilities(config.capabilities)
+	-- 		lspconfig[server].setup(config)
+	-- 	end
+	-- end,
 	{
 		"mrcjkb/rustaceanvim",
 		version = "^9",

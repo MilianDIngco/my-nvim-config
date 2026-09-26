@@ -3,6 +3,9 @@ require("mason").setup({ firewall = { enabled = true } })
 
 -- Capabilities
 --  so LSP servers know what my neovim config can do, just a table that goes to all the LSPs
+vim.lsp.config("*", {
+	capabilities = require("blink.cmp").get_lsp_capabilities(),
+})
 
 -- Attach behaviors
 --  what happens when a language server connects to a buffer?

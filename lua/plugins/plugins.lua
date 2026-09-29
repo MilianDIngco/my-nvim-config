@@ -70,8 +70,9 @@ return {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter",
+		branch = "main",
 		build = ":TSUpdate",
-		event = { "BufReadPost", "BufNewFile" },
+		lazy = false,
 		config = function()
 			require("config.treesitter")
 		end,
@@ -115,7 +116,29 @@ return {
 	},
 	{
 		"stevearc/conform.nvim",
-		opts = {},
+		opts = {
+			-- 1. Define formatters for your primary languages
+			formatters_by_ft = {
+				lua = { "stylua" },
+
+				-- C and C++ typically use clang-format
+				c = { "clang-format" },
+				cpp = { "clang-format" },
+
+				-- Rust standard formatter
+				rust = { "rustfmt" },
+
+				-- Python uses 'isort' to sort imports, then 'black' (or 'ruff') to format code
+				python = { "isort", "black" },
+
+				-- Web languages usually share 'prettier' or 'prettierd'
+				html = { "prettier" },
+				css = { "prettier" },
+				javascript = { "prettier" },
+				typescript = { "prettier" },
+				json = { "prettier" },
+			},
+		},
 		config = function()
 			require("config.formatting") --TODO (check github)
 		end,
@@ -132,13 +155,6 @@ return {
 			return require("config.completion")
 		end,
 	},
-	-- config = function(_, opts)
-	-- 	local lspconfig = require("lspconfig")
-	-- 	for server, config in pairs(opts.servers) do
-	-- 		config.capabilities = require("blink.cmp").get_lsp_capabilities(config.capabilities)
-	-- 		lspconfig[server].setup(config)
-	-- 	end
-	-- end,
 	{
 		"mrcjkb/rustaceanvim",
 		version = "^9",
